@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<TestData xmlns ="">
+    <Test>
+      <!--Первое число: целое от 0 до 1 000 000 000-->
+      <firstNum>2</firstNum>
+      <!--Второе число: целое от 0 до 1 000 000 000-->
+      <secondNum>2</secondNum>
+      <!--Операции над числами: 'плюс', 'минус', 'умножить', 'разделить'-->
+      <operation>плюс</operation>
+      <!--Ожидаемый результат вычисления-->
+      <result>3</result>
+      <!--Для дробных результатов деления использовать "," для отделения десятичной части-->
+    </Test>
+  <!--Дополнительные тесты-->
+    <Test>
+      <firstNum>6</firstNum>
+      <secondNum>11</secondNum>
+      <operation>плюс</operation>
+      <result>17</result>
+    </Test>
+  <Test>
+    <firstNum>10</firstNum>
+    <secondNum>4</secondNum>
+    <operation>разделить</operation>
+    <result>2,5</result>
+  </Test>
+  <Test>
+    <firstNum>49887984</firstNum>
+    <secondNum>11111</secondNum>
+    <operation>умножить</operation>
+    <result>100500</result>
+  </Test>
+</TestData>
