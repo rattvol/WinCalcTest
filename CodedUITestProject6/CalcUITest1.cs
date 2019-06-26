@@ -1,72 +1,56 @@
 ﻿using System;
+//using System.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UITesting;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.VisualStudio.TestTools.UITesting.WindowsRuntimeControls;
+//using Keyboard = Microsoft.VisualStudio.TestTools.UITesting.Keyboard;
 using System.IO;
-using System.Xml.Serialization;
-using System.Collections.Generic;
+using Microsoft.VisualStudio.TestTools.UITesting.WindowsRuntimeControls;
+using System.Diagnostics;
 
 namespace CodedUITestProject6
 {
-    [Serializable]
-    public class Test
-    {
-        [XmlElement]
-        public int firstNum { get; set; }
-        [XmlElement]
 
-        public int secondNum { get; set; }
-        [XmlElement]
-        public string operation { get; set; }
-        [XmlElement]
-        public string result { get; set; }
-    }
-
-    [CodedUITest(CodedUITestType.WindowsStore)]
+    //[CodedUITest(CodedUITestType.WindowsStore)]
+    [CodedUITest]
     public class CalcUITest1
     {
-        //===========Путь к размещению файлов с входным данными и результатами======================
-        public string path = "C:/Users/User/source/repos/CodedUITestProject6/CodedUITestProject6/";
+        //===========Путь к размещению файла с результатом======================
+        public string path = "C:/Users/User/source/repos/CodedUITestProject6/CodedUITestProject6/result.csv";
         //==========================================================================================
-
         [TestInitialize]
         public void Start()
         {
             //Запуск калькулятора
+
             XamlWindow.Launch("Microsoft.WindowsCalculator_8wekyb3d8bbwe!App");
+           
         }
+
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", "|DataDirectory|\\Data.xml", "operation", DataAccessMethod.Sequential), DeploymentItem("Data.xml")]
         [TestMethod]
         public void CodedUITestMethod2()
         {
+            //***********************************Выполнение тестов
+            //Ввод первого числа
+                string firstNum = TestContext.DataRow["firstNum"].ToString();
 
-            //чтение XML-файла с входными данными
-            StreamReader stream = new StreamReader(path + "Data.xml");
-            XmlRootAttribute xroot = new XmlRootAttribute();
-            xroot.ElementName = "TestData";
-            xroot.IsNullable = true;
-            XmlSerializer serializer = new XmlSerializer(typeof(List<Test>), xroot);
-            List<Test> testData = (List<Test>)serializer.Deserialize(stream);
-            //Выполнение тестов
-            for (int l = 0; l < testData.Count; l++)
+            for (int i = 0; i < firstNum.Length; i++)
             {
-
-                //Ввод первого числа
-                string num = Convert.ToString(testData[l].firstNum);
-                for (int i = 0; i < num.Length; i++)
-                {
-                    this.Ui.UiCalc.UiCalcNum.TypeOfButton = num.Substring(i, 1);
-                    Gesture.Tap(this.Ui.UiCalc.UiCalcNum.NumberButton);
-                }
-                //Ввод типа операции
-                Ui.UiCalc.UiCalcOper.TypeOfOper = testData[l].operation;
+                this.Ui.UiCalc.UiCalcNum.TypeOfButton = firstNum.Substring(i, 1);
+                //Mouse.Click(this.);
+                Gesture.Tap(this.Ui.UiCalc.UiCalcNum.NumberButton);
+            }
+            //Ввод типа операции
+            string operation = TestContext.DataRow["function"].ToString();
+                Ui.UiCalc.UiCalcOper.TypeOfOper = operation;
                 Gesture.Tap(this.Ui.UiCalc.UiCalcOper.OperationButton);
 
 
-                //Ввод второго числа
-                num = Convert.ToString(testData[l].secondNum);
-                for (int i = 0; i < num.Length; i++)
+            //Ввод второго числа
+            string secondNum = TestContext.DataRow["secondNum"].ToString();
+            for (int i = 0; i < secondNum.Length; i++)
                 {
-                    Ui.UiCalc.UiCalcNum.TypeOfButton = num.Substring(i, 1);
+                    Ui.UiCalc.UiCalcNum.TypeOfButton = secondNum.Substring(i, 1);
                     Gesture.Tap(this.Ui.UiCalc.UiCalcNum.NumberButton);
                 }
                 //Равно
@@ -75,7 +59,7 @@ namespace CodedUITestProject6
                 //Сравнение
                 string result = this.Ui.UiCalc.UiCalcText.UiText.DisplayText.Substring(19);
                 string resYes;
-                switch (testData[l].result == result)
+                switch (TestContext.DataRow["result"].ToString() == result)
                 {
                     case true:
                         resYes = "Пройден";
@@ -88,34 +72,25 @@ namespace CodedUITestProject6
                         break;
                 }
 
-                //Вывод результатов
-                try
-                {
-                    Assert.AreEqual(result, testData[l].result);
-                }
-                catch
-                {
-                    //результаты в файле result.csv
-                }
-               
                 //Вывод в CSV файл
                 //---Coздание файла если он несуществует
-                FileInfo fileInf = new FileInfo(path + "result.csv");
+                FileInfo fileInf = new FileInfo(path);
                 if (!fileInf.Exists)
                 {
                     FileStream fs = fileInf.Create();
                     fs.Close();
-                    using (StreamWriter sw = new StreamWriter(path + "result.csv", true, System.Text.Encoding.UTF8))
+                    using (StreamWriter sw = new StreamWriter(path, false, System.Text.Encoding.UTF8))
                     {
                         sw.WriteLine("Дата и время;Первое число;Операция;Второе число;Ожидаемый результат;Фактический результат;Результат теста");
                     }
 
                 }
-                using (StreamWriter sw = new StreamWriter(path + "result.csv", true, System.Text.Encoding.UTF8))
+                using (StreamWriter sw = new StreamWriter(path, true, System.Text.Encoding.UTF8))
                 {
-                    sw.WriteLine("{0};{1};{2};{3};{4};{5};{6}", DateTime.Now, testData[l].firstNum, testData[l].operation, testData[l].secondNum, testData[l].result, result, resYes); ; ;
+                    sw.WriteLine("{0};{1};{2};{3};{4};{5};{6}", DateTime.Now, firstNum, operation, secondNum, TestContext.DataRow["result"].ToString(), result, resYes);
                 }
-            }
+                                Assert.AreEqual(result, TestContext.DataRow["result"].ToString());
+
         }
         //***********************************************************************
         [TestCleanup]
@@ -136,5 +111,11 @@ namespace CodedUITestProject6
             }
         }
         private Ui mUi;
+        private TestContext testContextInstance;
+        public TestContext TestContext
+        {
+            get { return testContextInstance; }
+            set { testContextInstance = value; }
+        }
     }
 }

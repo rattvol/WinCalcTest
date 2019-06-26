@@ -3,7 +3,7 @@ using Microsoft.VisualStudio.TestTools.UITesting.WindowsRuntimeControls;
 
 namespace CodedUITestProject6
 {
-    public class Ui
+    public class Ui :XamlWindow
     {
         public UiCalc UiCalc
         {
